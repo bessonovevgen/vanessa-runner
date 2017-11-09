@@ -50,36 +50,6 @@ node("qanode") {
     // }
   }
 
-  stage('BDD тестирование'){ 
-
-    echo "exec bdd features"
-
-    command = """opm run coverage"""
-
-    def errors = []
-    try{
-        cmd(command)
-    } catch (e) {
-         errors << "BDD status : ${e}"
-    }
-
-    if (errors.size() > 0) {
-        currentBuild.result = 'UNSTABLE'
-        for (int i = 0; i < errors.size(); i++) {
-            echo errors[i]
-        }
-    }           
-
-    step([$class: 'ArtifactArchiver', artifacts: '**/bdd-exec.xml', fingerprint: true])
-    
-    step([$class: 'JUnitResultArchiver', testResults: '**/bdd-exec.xml'])
-  }
-
-    stage('build'){
-        command = """opm build"""
-        cmd(command)
-        step([$class: 'ArtifactArchiver', artifacts: '**/vanessa-runner*.ospx', fingerprint: true])
-    }
 
   stage('Контроль технического долга'){ 
 
@@ -88,7 +58,7 @@ node("qanode") {
         println env.QASONAR;
         def sonarcommand = "@\"./../../tools/hudson.plugins.sonar.SonarRunnerInstallation/Main_Classic/bin/sonar-scanner\""
         withCredentials([[$class: 'StringBinding', credentialsId: env.SonarOAuthCredentianalID, variable: 'SonarOAuth']]) {
-            sonarcommand = sonarcommand + " -Dsonar.host.url=http://sonar.silverbulleters.org -Dsonar.login=${env.SonarOAuth}"
+            sonarcommand = sonarcommand + " -Dsonar.host.url=https://sonar-sel.silverbulleters.org -Dsonar.login=${env.SonarOAuth}"
         }
         
         // Get version - в модуле 'src/Модули/ПараметрыСистемы.os' должна быть строка формата Версия = "0.8.1";
